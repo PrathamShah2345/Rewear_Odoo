@@ -14,10 +14,20 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 w-full z-50 bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-4 flex justify-between items-center text-black-500">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-black">
-          Re<span className="text-emerald-600">Wear</span> Revolution
-        </h1>
 
+        {/* LOGO + BRAND NAME */}
+        <Link to="/" className="flex items-center gap-2">
+          <img
+            src="/logo.png" // Make sure the image is placed in your public folder with this name
+            alt="ReWear Logo"
+            className="w-8 h-8 sm:w-10 sm:h-10"
+          />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-black">
+            Re<span className="text-emerald-600">Wear</span> Revolution
+          </h1>
+        </Link>
+
+        {/* NAV LINKS */}
         <div className="space-x-4 sm:space-x-6 text-sm sm:text-base font-medium flex items-center">
           <Link to="/" className="hover:text-emerald-600">Home</Link>
           <Link to="/items" className="hover:text-emerald-600">Browse</Link>

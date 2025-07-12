@@ -17,12 +17,12 @@ const demoItems = [
   {
     id: 3,
     title: "Kids",
-    imageUrl: "https://images.pexels.com/photos/1632553/pexels-photo-1632553.jpeg",
+    imageUrl: "https://images.pexels.com/photos/1620796/pexels-photo-1620796.jpeg",
   },
   {
     id: 4,
     title: "Accessories",
-    imageUrl: "https://images.pexels.com/photos/4041687/pexels-photo-4041687.jpeg",
+    imageUrl: "https://images.pexels.com/photos/10573237/pexels-photo-10573237.jpeg",
   },
 ];
 
@@ -40,7 +40,7 @@ const Home = () => {
       {/* Welcome Section */}
       <section className="py-10 px-6 md:px-12 text-center">
         <h1 className="text-4xl md:text-5xl font-extrabold text-emerald-900 drop-shadow mb-4">
-          Welcome to ReWear 👕
+          Welcome to ReWear 
         </h1>
         <p className="text-lg md:text-xl text-emerald-700 max-w-2xl mx-auto">
           ReWear is your go-to platform to swap stylish, sustainable clothing with others. List what you don’t need, find what you love.
