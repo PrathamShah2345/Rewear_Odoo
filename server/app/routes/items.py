@@ -12,6 +12,10 @@ def upload_item():
     data = request.get_json()
     user_id = int(get_jwt_identity())
 
+    existing_item = Item.query.filter_by(title=data.get('title'), user_id=user_id).first()
+    if existing_item:
+        return jsonify({"msg": "Item with this title already exists"}), 409
+
     item = Item(
         title = data.get('title'),
         description = data.get('description'),
