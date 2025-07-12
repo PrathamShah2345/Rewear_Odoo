@@ -1,46 +1,42 @@
 // src/pages/ItemDetails.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getItems, requestSwap } from '../services/api';
 
 const ItemDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [swapMsg, setSwapMsg] = useState('');
 
   useEffect(() => {
-    const allItems = [];
-    for (const key in localStorage) {
-      if (key.startsWith('uploads_')) {
-        const email = key.split('uploads_')[1];
-        const uploads = JSON.parse(localStorage.getItem(key)) || [];
-        uploads.forEach((upload) => {
-          allItems.push({ ...upload, lister: email });
-        });
+    const fetchItem = async () => {
+      setLoading(true);
+      try {
+        // If you have a getItemById, use it. Otherwise, fetch all and filter:
+        const items = await getItems();
+        const found = items.find((i) => String(i.id) === String(id));
+        setItem(found);
+      } catch (err) {
+        setError('Failed to load item.');
       }
-    }
-    const foundItem = allItems.find((i) => i.timestamp.toString() === id);
-    setItem(foundItem);
-    setLoading(false);
+      setLoading(false);
+    };
+    fetchItem();
   }, [id]);
 
-  const handleSwapRequest = () => {
-    const currentUser = JSON.parse(localStorage.getItem('user'));
-    if (!currentUser || !item) return;
-
-    const swapKey = `swap_requests_${item.lister}`;
-    const existing = JSON.parse(localStorage.getItem(swapKey)) || [];
-
-    const newRequest = {
-      id: Date.now(),
-      from: currentUser.email,
-      itemTitle: item.title,
-      status: 'Pending',
-    };
-
-    localStorage.setItem(swapKey, JSON.stringify([...existing, newRequest]));
-    alert('Swap request sent!');
-    navigate('/items');
+  const handleSwapRequest = async () => {
+    const token = localStorage.getItem('token');
+    if (!token || !item) return;
+    try {
+      const result = await requestSwap(item.id, token);
+      setSwapMsg(result.msg || 'Swap request sent!');
+      setTimeout(() => navigate('/items'), 1200);
+    } catch (err) {
+      setSwapMsg('Failed to send swap request.');
+    }
   };
 
   if (loading) return <p className="text-center mt-20">Loading item details...</p>;
@@ -50,7 +46,7 @@ const ItemDetails = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-100 to-green-200 px-6 py-10 text-gray-800">
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
         <img
-          src={item.imageUrl}
+          src={item.image_url}
           alt={item.title}
           className="w-full h-64 object-cover rounded mb-4"
         />
@@ -60,10 +56,12 @@ const ItemDetails = () => {
         <p><strong>Type:</strong> {item.type || 'Casual'}</p>
         <p><strong>Category:</strong> {item.category}</p>
         <p><strong>Description:</strong> {item.description || 'No description provided.'}</p>
-        <p><strong>Listed by:</strong> {item.lister}</p>
-        <p><strong>Posted on:</strong> {new Date(item.timestamp).toLocaleString()}</p>
+        <p><strong>Listed by:</strong> {item.username}</p>
+        <p><strong>Posted on:</strong> {item.created_at ? new Date(item.created_at).toLocaleString() : ''}</p>
 
-        {JSON.parse(localStorage.getItem('user'))?.email !== item.lister ? (
+        {swapMsg && <div className="text-green-600 text-center my-2">{swapMsg}</div>}
+
+        {localStorage.getItem('token') && item.username !== (JSON.parse(localStorage.getItem('user'))?.username) ? (
           <button
             onClick={handleSwapRequest}
             className="mt-6 w-full bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700"

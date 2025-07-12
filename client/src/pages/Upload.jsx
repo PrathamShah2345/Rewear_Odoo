@@ -1,10 +1,10 @@
-// src/pages/Upload.jsx
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { uploadItem } from '../services/api';
 
 const Upload = () => {
-  const currentUser = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -20,22 +20,14 @@ const Upload = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const editId = searchParams.get('id');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  // Prefill data if editing
+  // Prefill data if editing (client-side only, not supported in API version)
   useEffect(() => {
-  if (!currentUser || !editId) return;
-
-  const key = `uploads_${currentUser.email}`;
-  const uploads = JSON.parse(localStorage.getItem(key)) || [];
-  const itemToEdit = uploads.find((item) => item.id.toString() === editId);
-
-  if (itemToEdit && formData.title === '') {
-    setFormData({
-      ...itemToEdit,
-      image: null, // Don’t overwrite file input
-    });
-  }
-}, [editId, currentUser, formData.title]);
+    // If you want to support editing via API, fetch item by id here
+    // For now, skip prefill for API version
+  }, [editId]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -45,46 +37,55 @@ const Upload = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!currentUser) return alert("You must be logged in to upload.");
-
-    const key = `uploads_${currentUser.email}`;
-    const existing = JSON.parse(localStorage.getItem(key)) || [];
-
-    let updatedUpload = {
-      ...formData,
-      id: editId ? parseInt(editId) : Date.now(),
-      timestamp: new Date().toISOString(),
-    };
-
-    // 🖼 If new image selected, update imageUrl
-    if (formData.image) {
-      updatedUpload.imageUrl = URL.createObjectURL(formData.image);
-    } else {
-      const existingItem = existing.find((item) => item.id.toString() === editId);
-      updatedUpload.imageUrl = existingItem?.imageUrl || '';
+    setError('');
+    setSuccess('');
+    if (!token) {
+      setError("You must be logged in to upload.");
+      return;
     }
 
-   const filtered = existing.filter((item) => item.id.toString() !== editId);
+    // Prepare item data for API (excluding image upload for now)
+    const itemData = {
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      type: formData.type,
+      size: formData.size,
+      condition: formData.condition,
+      tags: formData.tags,
+      image_url: formData.imageUrl, // You may want to handle image upload separately
+    };
 
-    localStorage.setItem(key, JSON.stringify([updatedUpload, ...filtered]));
-
-    alert(editId ? "Item updated successfully!" : "Item uploaded successfully!");
-    navigate('/dashboard');
+    try {
+      const result = await uploadItem(itemData, token);
+      if (result.msg === "Item uploaded successfully") {
+        setSuccess("Item uploaded successfully!");
+        setTimeout(() => navigate('/dashboard'), 1200);
+      } else if (result.msg) {
+        setError(result.msg);
+      } else {
+        setError("Upload failed.");
+      }
+    } catch (err) {
+      setError("Server error. Please try again.");
+    }
   };
 
   return (
-   <motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  className="pt-24 min-h-screen bg-gradient-to-tr from-green-50 via-emerald-100 to-green-200 px-4 py-8"
->
-
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="pt-24 min-h-screen bg-gradient-to-tr from-green-50 via-emerald-100 to-green-200 px-4 py-8"
+    >
       <form onSubmit={handleSubmit} className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Section */}
         <div className="md:col-span-2 space-y-6 bg-white p-6 rounded-xl shadow border border-emerald-200">
           <h2 className="text-2xl font-bold text-emerald-800">Item Details</h2>
+
+          {error && <div className="text-red-600 text-center text-sm">{error}</div>}
+          {success && <div className="text-green-600 text-center text-sm">{success}</div>}
 
           <div>
             <label className="block text-sm font-medium mb-1">Item Title</label>
@@ -126,7 +127,9 @@ const Upload = () => {
               accept="image/*"
               onChange={handleChange}
               className="w-full p-2 text-sm border h-10 border-emerald-300 rounded-md"
+              disabled
             />
+            <span className="text-xs text-gray-400">Image upload not supported yet.</span>
           </div>
         </div>
 
@@ -216,7 +219,7 @@ const Upload = () => {
           >
             {editId ? 'Update Item' : 'Upload Item'}
           </button>
-        </div>
+          </div>
       </form>
     </motion.div>
   );

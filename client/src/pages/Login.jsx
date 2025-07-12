@@ -1,21 +1,27 @@
-// src/pages/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { login } from '../services/api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
 
-    if (email === 'admin@rewear.com' && password === 'admin123') {
-      localStorage.setItem('user', JSON.stringify({ role: 'admin', email }));
-      navigate('/admin');
-    } else {
-      localStorage.setItem('user', JSON.stringify({ role: 'user', email }));
-      navigate('/dashboard');
+    try {
+      const result = await login(email, password);
+      if (result.access_token) {
+        localStorage.setItem('token', result.access_token);
+        navigate('/dashboard');
+      } else {
+        setError(result.msg || 'Login failed');
+      }
+    } catch (err) {
+      setError('Server error. Please try again.');
     }
   };
 
@@ -26,6 +32,10 @@ const Login = () => {
         className="w-full max-w-sm bg-white/70 backdrop-blur-md border border-emerald-200 shadow-lg p-6 rounded-2xl space-y-5"
       >
         <h2 className="text-2xl font-bold text-center text-emerald-800">Login</h2>
+
+        {error && (
+          <div className="text-red-600 text-center text-sm">{error}</div>
+        )}
 
         <input
           type="email"

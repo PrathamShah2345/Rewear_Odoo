@@ -1,33 +1,28 @@
 // src/pages/Home.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Carousel from '../components/Carousel';
-
-const demoItems = [
-  {
-    id: 1,
-    title: "Men",
-    imageUrl: "https://images.pexels.com/photos/842811/pexels-photo-842811.jpeg",
-  },
-  {
-    id: 2,
-    title: "Women",
-    imageUrl: "https://images.pexels.com/photos/1036622/pexels-photo-1036622.jpeg",
-  },
-  {
-    id: 3,
-    title: "Kids",
-    imageUrl: "https://images.pexels.com/photos/1632553/pexels-photo-1632553.jpeg",
-  },
-  {
-    id: 4,
-    title: "Accessories",
-    imageUrl: "https://images.pexels.com/photos/4041687/pexels-photo-4041687.jpeg",
-  },
-];
+import { getItems } from '../services/api';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch items from backend
+    const fetchItems = async () => {
+      setLoading(true);
+      try {
+        const data = await getItems();
+        setItems(data || []);
+      } catch (err) {
+        setItems([]);
+      }
+      setLoading(false);
+    };
+    fetchItems();
+  }, []);
 
   const handleCardClick = (category) => {
     navigate(`/items?category=${category}`);
@@ -67,29 +62,33 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Category Cards in Place of Popular Picks */}
+      {/* Featured Items */}
       <section className="px-6 md:px-12 pb-16">
-        <h2 className="text-2xl font-bold mb-6 text-emerald-900 text-center md:text-left">Browse by Category</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {demoItems.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => handleCardClick(item.title)}
-              className="relative cursor-pointer rounded-2xl overflow-hidden group hover:scale-[1.03] transition-transform duration-200 shadow-lg"
-            >
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                className="w-full h-48 object-cover"
-              />
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                <span className="text-white text-xl font-bold drop-shadow">
-                  {item.title}
-                </span>
+        <h2 className="text-2xl font-bold mb-6 text-emerald-900 text-center md:text-left">Featured Items</h2>
+        {loading ? (
+          <p className="text-center text-emerald-700">Loading items...</p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {items.slice(0, 8).map((item) => (
+              <div
+                key={item.id}
+                onClick={() => handleCardClick(item.category)}
+                className="relative cursor-pointer rounded-2xl overflow-hidden group hover:scale-[1.03] transition-transform duration-200 shadow-lg"
+              >
+                <img
+                  src={item.image_url}
+                  alt={item.title}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <span className="text-white text-xl font-bold drop-shadow">
+                    {item.title}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
