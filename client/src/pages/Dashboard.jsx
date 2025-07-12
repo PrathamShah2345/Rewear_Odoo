@@ -1,61 +1,57 @@
 // src/pages/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
 import ProductCard from '../components/ProductCard';
+import {
+  getUserProfile,
+  getItemsByUsername,
+  getMySwaps,
+  respondToSwap,
+} from '../services/api';
 
 const Dashboard = () => {
   const currentUser = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
   const [myItems, setMyItems] = useState([]);
   const [points, setPoints] = useState(0);
   const [swapRequests, setSwapRequests] = useState([]);
-  const [sentRequests, setSentRequests] = useState([]); // ✅ New state
+  const [sentRequests, setSentRequests] = useState([]);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || !token) return;
 
-    // Load own uploads
-    const key = `uploads_${currentUser.email}`;
-    const data = JSON.parse(localStorage.getItem(key)) || [];
-    setMyItems(data);
+    // Fetch user profile (for points)
+    getUserProfile(currentUser.username).then(profile => {
+      setPoints(profile?.points || 0);
+    });
 
-    // Load points
-    const pointsKey = `points_${currentUser.email}`;
-    const storedPoints = JSON.parse(localStorage.getItem(pointsKey)) || 0;
-    setPoints(storedPoints);
+    // Fetch user's items
+    getItemsByUsername(currentUser.username).then(items => {
+      setMyItems(items || []);
+    });
 
-    // Load incoming swap requests
-    const swapKey = `swap_requests_${currentUser.email}`;
-    const requests = JSON.parse(localStorage.getItem(swapKey)) || [];
-    setSwapRequests(requests);
+    // Fetch incoming swap requests
+    getMySwaps(token, 'incoming').then(requests => {
+      setSwapRequests(requests || []);
+    });
 
-    // 🔍 Load outgoing swap requests
-    const sent = [];
-    for (const key in localStorage) {
-      if (key.startsWith('swap_requests_')) {
-        const list = JSON.parse(localStorage.getItem(key)) || [];
-        list.forEach((req) => {
-          if (req.from === currentUser.email) {
-            sent.push({ ...req, to: key.replace('swap_requests_', '') });
-          }
-        });
-      }
-    }
-    setSentRequests(sent);
-  }, []);
+    // Fetch outgoing swap requests
+    getMySwaps(token, 'outgoing').then(sent => {
+      setSentRequests(sent || []);
+    });
+  }, [currentUser, token]);
 
-  const handleAccept = (id) => {
-    const updated = swapRequests.map((r) =>
+  const handleAccept = async (id) => {
+    await respondToSwap(id, 'Accepted', token);
+    setSwapRequests(swapRequests.map((r) =>
       r.id === id ? { ...r, status: 'Accepted' } : r
-    );
-    setSwapRequests(updated);
-    localStorage.setItem(`swap_requests_${currentUser.email}`, JSON.stringify(updated));
+    ));
   };
 
-  const handleReject = (id) => {
-    const updated = swapRequests.map((r) =>
+  const handleReject = async (id) => {
+    await respondToSwap(id, 'Rejected', token);
+    setSwapRequests(swapRequests.map((r) =>
       r.id === id ? { ...r, status: 'Rejected' } : r
-    );
-    setSwapRequests(updated);
-    localStorage.setItem(`swap_requests_${currentUser.email}`, JSON.stringify(updated));
+    ));
   };
 
   return (

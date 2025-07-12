@@ -1,21 +1,36 @@
-// src/pages/Register.jsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { register } from '../services/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
   });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    console.log('Registering user:', formData);
+    setError('');
+    setSuccess('');
+    try {
+      const result = await register(formData.username, formData.email, formData.password);
+      if (result.msg === "User registered successfully") {
+        setSuccess('Registration successful! Redirecting to login...');
+        setTimeout(() => navigate('/login'), 1500);
+      } else {
+        setError(result.msg || 'Registration failed');
+      }
+    } catch (err) {
+      setError('Server error. Please try again.');
+    }
   };
 
   return (
@@ -26,12 +41,19 @@ const Register = () => {
       >
         <h2 className="text-2xl font-bold text-center text-emerald-800">Create Account</h2>
 
+        {error && (
+          <div className="text-red-600 text-center text-sm">{error}</div>
+        )}
+        {success && (
+          <div className="text-green-600 text-center text-sm">{success}</div>
+        )}
+
         <input
           type="text"
-          name="name"
+          name="username"
           placeholder="Full Name"
           className="w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
-          value={formData.name}
+          value={formData.username}
           onChange={handleChange}
           required
         />

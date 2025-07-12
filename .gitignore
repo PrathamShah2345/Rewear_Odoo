@@ -15,7 +15,7 @@ server/migrations/versions/*.pyc
 # React
 client/node_modules/
 client/build/
-client/.env
+client/src/.env
 
 # VS Code / PyCharm / IDEs
 .vscode/
