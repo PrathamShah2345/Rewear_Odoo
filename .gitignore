@@ -1,0 +1,23 @@
+# General
+__pycache__/
+*.py[cod]
+*.log
+*.sqlite3
+
+# Python Virtualenv
+venv/
+
+server/.env
+
+# Flask-Migrate cache
+server/migrations/versions/*.pyc
+
+# React
+client/node_modules/
+client/build/
+client/.env
+
+# VS Code / PyCharm / IDEs
+.vscode/
+.idea/
+.DS_Store

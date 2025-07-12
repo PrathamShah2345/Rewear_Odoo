@@ -1,0 +1,57 @@
+// src/components/Navbar.jsx
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
+const Navbar = () => {
+  const navigate = useNavigate();
+  const currentUser = JSON.parse(localStorage.getItem('user'));
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  return (
+    <nav className="fixed top-0 w-full z-50 bg-white shadow-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-4 flex justify-between items-center text-black-500">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-black">
+          Re<span className="text-emerald-600">Wear</span> Revolution
+        </h1>
+
+        <div className="space-x-4 sm:space-x-6 text-sm sm:text-base font-medium flex items-center">
+          <Link to="/" className="hover:text-emerald-600">Home</Link>
+          <Link to="/items" className="hover:text-emerald-600">Browse</Link>
+          <Link to="/upload" className="hover:text-emerald-600">Upload</Link>
+          <Link to="/dashboard" className="hover:text-emerald-600">Dashboard</Link>
+
+          {currentUser?.role === 'admin' && (
+            <Link to="/admin" className="text-red-600 hover:text-red-700 font-semibold">Admin</Link>
+          )}
+
+          {currentUser ? (
+            <button
+              onClick={handleLogout}
+              className="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 transition"
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 transition"
+              >
+                Login
+              </Link>
+              <Link to="/register" className="text-emerald-700 hover:underline">
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
