@@ -7,7 +7,6 @@ app = create_app()
 def check_db_connection():
     with app.app_context():
         try:
-            # Try connecting and running a lightweight query
             with db.engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
             print("Database connection successful.")

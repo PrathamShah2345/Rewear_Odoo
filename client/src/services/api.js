@@ -1,7 +1,7 @@
 // src/api.js
 
 const BASE = import.meta.env.VITE_API || 'http://localhost:5000';
-
+console.log(import.meta.env.VITE_API, BASE)
 // 🔐 Auth
 export const register = async (username, email, password) => {
   const res = await fetch(`${BASE}/auth/register`, {

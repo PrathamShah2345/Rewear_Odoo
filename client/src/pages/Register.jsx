@@ -4,7 +4,7 @@ import { register } from '../services/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
   });
@@ -21,7 +21,7 @@ const Register = () => {
     setError('');
     setSuccess('');
     try {
-      const result = await register(formData.name, formData.email, formData.password);
+      const result = await register(formData.username, formData.email, formData.password);
       if (result.msg === "User registered successfully") {
         setSuccess('Registration successful! Redirecting to login...');
         setTimeout(() => navigate('/login'), 1500);
@@ -50,10 +50,10 @@ const Register = () => {
 
         <input
           type="text"
-          name="name"
+          name="username"
           placeholder="Full Name"
           className="w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
-          value={formData.name}
+          value={formData.username}
           onChange={handleChange}
           required
         />
