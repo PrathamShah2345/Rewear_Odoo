@@ -24,7 +24,7 @@ const ItemListing = () => {
   }, []);
 
   return (
-    <div className="min-h-screen px-6 py-5 text-gray-800">
+    <div className="px-6 pt-5 pb-15 text-gray-800">
       <h1 className="text-3xl font-bold mb-6 text-emerald-900">Available Items</h1>
       {loading ? (
         <p className="text-center text-emerald-700 mt-20">Loading items...</p>
