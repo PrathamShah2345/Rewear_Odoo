@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../services/api';
+import { login, getCurrentUser } from '../services/api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -16,7 +16,11 @@ const Login = () => {
       const result = await login(email, password);
       if (result.access_token) {
         localStorage.setItem('token', result.access_token);
-        navigate('/dashboard');
+        const userInfo = await getCurrentUser(result.access_token);
+        localStorage.setItem('user', JSON.stringify(userInfo));
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1200);
       } else {
         setError(result.msg || 'Login failed');
       }

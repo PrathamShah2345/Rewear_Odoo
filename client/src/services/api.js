@@ -38,7 +38,7 @@ export const getCurrentUser = async (token) => {
 
 // 🧺 Items
 export const uploadItem = async (item, token) => {
-  const res = await fetch(`${BASE}/items`, {
+  const res = await fetch(`${BASE}/items/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -87,8 +87,8 @@ export const respondToSwap = async (swapId, status, token) => {
   return res.json();
 };
 
-export const getMySwaps = async (token, status = '') => {
-  const url = status ? `${BASE}/swaps/mine?status=${status}` : `${BASE}/swaps/mine`;
+export const getMySwaps = async (token) => {
+  const url = `${BASE}/swaps/mine`;
   const res = await fetch(url, {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` },
@@ -103,14 +103,6 @@ export const cancelSwap = async (swapId, token) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  return res.json();
-};
-
-
-
-// 👤 Users
-export const getUserProfile = async (username) => {
-  const res = await fetch(`${BASE}/users/${username}`);
   return res.json();
 };
 

@@ -6,13 +6,14 @@ import { useState, useEffect } from "react";
 const Navbar = () => {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
+  const token = localStorage.getItem("token");
 
   async function getUser() {
-    const token = localStorage.getItem("token");
     if (token) {
       try {
         const user = await getCurrentUser(token);
         setCurrentUser(user);
+        localStorage.setItem("user", JSON.stringify(user));
       } catch (error) {
         console.error("Failed to fetch current user:", error);
       }
@@ -21,13 +22,14 @@ const Navbar = () => {
   
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setCurrentUser(null);
     navigate("/login");
   };
 
   useEffect(() => {
     getUser();
-  },[]);
+  },[token]);
 
   return (
     <nav className="sticky top-0 w-full z-50 bg-white/60 backdrop-blur-lg border-b border-white/30 shadow-md transition-all duration-300 mb-1">
