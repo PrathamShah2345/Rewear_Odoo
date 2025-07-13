@@ -27,7 +27,7 @@ const Navbar = () => {
 
   useEffect(() => {
     getUser();
-  })
+  },[]);
 
   return (
     <nav className="sticky top-0 w-full z-50 bg-white/60 backdrop-blur-lg border-b border-white/30 shadow-md transition-all duration-300 mb-1">

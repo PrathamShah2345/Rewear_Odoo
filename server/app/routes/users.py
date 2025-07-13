@@ -27,8 +27,4 @@ def get_user_items(username):
             "created_at": item.created_at
         })
 
-    return jsonify({
-        "username": user.username,
-        "total_items": len(item_list),
-        "items": item_list
-    }), 200
+    return jsonify(item_list), 200

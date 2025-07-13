@@ -88,7 +88,7 @@ def my_swaps():
     sent = Swap.query.filter_by(requested_by=user_id).all()
     received = Swap.query.filter_by(requested_to=user_id).all()
 
-    def formate_swap(swap):
+    def format_swap(swap):
         return {
             "id": swap.id,
             "item": {
@@ -108,7 +108,7 @@ def my_swaps():
         }
     
     return jsonify({
-        "sent": [formate_swap(swap) for swap in sent],
-        "received": [formate_swap(swap) for swap in received]
+        "sent": [format_swap(swap) for swap in sent],
+        "received": [format_swap(swap) for swap in received]
     }), 200
 
