@@ -30,8 +30,8 @@ const Navbar = () => {
   })
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-4 flex justify-between items-center text-black-500">
+    <nav className="sticky top-0 w-full z-50 bg-white/60 backdrop-blur-lg border-b border-white/30 shadow-md transition-all duration-300 mb-1">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-2 md:py-3 flex justify-between items-center text-black-500">
         {/* LOGO + BRAND NAME */}
         <Link to="/" className="flex items-center gap-2">
           <img
@@ -40,7 +40,7 @@ const Navbar = () => {
             className="w-8 h-8 sm:w-10 sm:h-10"
           />
           <h1 className="text-2xl sm:text-3xl font-extrabold text-black">
-            Re<span className="text-emerald-600">Wear</span> Revolution
+            Re<span className="text-emerald-600">Wear</span>
           </h1>
         </Link>
 

@@ -29,7 +29,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-100 to-green-200 py-5 text-gray-800">
+    <div className="min-h-screen py-5 text-gray-800">
       <Carousel />
 
       {/* Welcome Section */}

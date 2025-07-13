@@ -14,7 +14,7 @@ function App() {
   return (
  <Router>
       {/* ✅ Entire app must be inside Router */}
-      <div className="min-h-screen bg-gradient-to-br from-[#f7f0ff] via-[#e0f7fa] to-[#ffe0f0] text-gray-800">
+      <div className="min-h-screen bg-gradient-to-br from-green-100 via-emerald-150 to-green-200 text-gray-800">
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />

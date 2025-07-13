@@ -17,7 +17,7 @@ const Carousel = () => {
   }, [current]);
 
   return (
-    <div className="relative w-full h-[300px] md:h-[400px] overflow-hidden rounded-b-3xl shadow-lg">
+    <div className="relative w-[96%] mx-auto h-[300px] md:h-[400px] overflow-hidden rounded-3xl shadow-lg">
       <img
         src={images[current]}
         alt="carousel"
