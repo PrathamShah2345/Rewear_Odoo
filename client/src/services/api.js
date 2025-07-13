@@ -26,6 +26,11 @@ export const getCurrentUser = async (token) => {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` },
   });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch current user');
+  }
+  
   return res.json();
 };
 

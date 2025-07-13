@@ -18,5 +18,5 @@ def check_db_connection():
 
 if __name__ == "__main__":
     check_db_connection()
-    print("Starting Flask server at http://127.0.0.1:5000/")
+    print("Starting Flask server at http://127.0.0.1:5000")
     app.run(host="0.0.0.0", port=5000, debug=True)

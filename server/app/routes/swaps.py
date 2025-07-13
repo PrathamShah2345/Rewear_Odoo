@@ -57,10 +57,23 @@ def respond_swap(swap_id):
     
     if swap.requested_to != user_id:
         return jsonify({"error": "You are not authorized to respond to this swap"}), 403
-    
+
     if swap.status != 'pending':
         return jsonify({"error": f"Swap is already {swap.status}"}), 400
     
+    if new_status == 'accepted':
+        # Update item ownership
+        item = Item.query.filter_by(id=swap.item_id).first()
+        if not item:
+            return jsonify({"error": "Item not found"}), 404
+        
+        item.user_id = swap.requested_by
+        swap.status = 'accepted'
+        db.session.add(item)
+        db.session.commit()
+
+        return jsonify({"msg": "Swap accepted, item ownership updated"}), 200
+
     swap.status = new_status
     db.session.commit()
 
@@ -98,3 +111,4 @@ def my_swaps():
         "sent": [formate_swap(swap) for swap in sent],
         "received": [formate_swap(swap) for swap in received]
     }), 200
+

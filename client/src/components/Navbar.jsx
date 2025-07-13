@@ -1,20 +1,37 @@
 // src/components/Navbar.jsx
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../services/api";
+import { useState, useEffect } from "react";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const currentUser = JSON.parse(localStorage.getItem('user'));
+  const [currentUser, setCurrentUser] = useState(null);
 
+  async function getUser() {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const user = await getCurrentUser(token);
+        setCurrentUser(user);
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+      }
+    }
+  }
+  
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login');
+    localStorage.removeItem("token");
+    setCurrentUser(null);
+    navigate("/login");
   };
+
+  useEffect(() => {
+    getUser();
+  })
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-4 flex justify-between items-center text-black-500">
-
         {/* LOGO + BRAND NAME */}
         <Link to="/" className="flex items-center gap-2">
           <img
@@ -29,22 +46,37 @@ const Navbar = () => {
 
         {/* NAV LINKS */}
         <div className="space-x-4 sm:space-x-6 text-sm sm:text-base font-medium flex items-center">
-          <Link to="/" className="hover:text-emerald-600">Home</Link>
-          <Link to="/items" className="hover:text-emerald-600">Browse</Link>
-          <Link to="/upload" className="hover:text-emerald-600">Upload</Link>
-          <Link to="/dashboard" className="hover:text-emerald-600">Dashboard</Link>
+          <Link to="/" className="hover:text-emerald-600">
+            Home
+          </Link>
+          <Link to="/items" className="hover:text-emerald-600">
+            Browse
+          </Link>
 
-          {currentUser?.role === 'admin' && (
-            <Link to="/admin" className="text-red-600 hover:text-red-700 font-semibold">Admin</Link>
+          {currentUser?.role === "admin" && (
+            <Link
+              to="/admin"
+              className="text-red-600 hover:text-red-700 font-semibold"
+            >
+              Admin
+            </Link>
           )}
 
           {currentUser ? (
-            <button
-              onClick={handleLogout}
-              className="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 transition"
-            >
-              Logout
-            </button>
+            <>
+              <Link to="/upload" className="hover:text-emerald-600">
+                Upload
+              </Link>
+              <Link to="/dashboard" className="hover:text-emerald-600">
+                Dashboard
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 transition"
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <>
               <Link
