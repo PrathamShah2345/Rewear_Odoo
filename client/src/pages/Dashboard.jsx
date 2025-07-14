@@ -28,7 +28,7 @@ const Dashboard = () => {
 
     fetchDashboardData();
     console.log("Dashboard data fetched successfully");
-  }, [token, currentUser]);
+  }, [token]);
 
   const handleAccept = async (id) => {
     await respondToSwap(id, "accepted", token);
