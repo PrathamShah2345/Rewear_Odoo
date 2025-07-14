@@ -23,30 +23,62 @@ const Upload = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Prefill data if editing (client-side only, not supported in API version)
   useEffect(() => {
-    // If you want to support editing via API, fetch item by id here
-    // For now, skip prefill for API version
+    // Skipped for now
   }, [editId]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData({
-      ...formData,
-      [name]: files ? files[0] : value,
-    });
+    if (name === 'image' && files && files[0]) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          image: file,
+          imageUrl: reader.result, // preview
+        }));
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
     if (!token) {
-      setError("You must be logged in to upload.");
+      setError('You must be logged in to upload.');
       return;
     }
 
-    // Prepare item data for API (excluding image upload for now)
+    let uploadedImageUrl = formData.imageUrl;
+
+    // 🟢 Upload to Cloudinary if image selected
+    if (formData.image) {
+      const cloudData = new FormData();
+      cloudData.append('file', formData.image);
+      cloudData.append('upload_preset', 'rewear'); // Change this
+      cloudData.append('cloud_name', 'dzbfhy0rz'); // Change this
+
+      try {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/dzbfhy0rz/image/upload`, {
+          method: 'POST',
+          body: cloudData,
+        });
+
+        const result = await response.json();
+        uploadedImageUrl = result.secure_url;
+      } catch (err) {
+        console.error(err);
+        setError('Image upload failed.');
+        return;
+      }
+    }
+
     const itemData = {
       title: formData.title,
       description: formData.description,
@@ -55,7 +87,7 @@ const Upload = () => {
       size: formData.size,
       condition: formData.condition,
       tags: formData.tags,
-      image_url: formData.imageUrl, // You may want to handle image upload separately
+      image_url: uploadedImageUrl,
     };
 
     try {
@@ -63,10 +95,8 @@ const Upload = () => {
       if (result.msg === "Item uploaded successfully") {
         setSuccess("Item uploaded successfully!");
         setTimeout(() => navigate('/dashboard'), 1200);
-      } else if (result.msg) {
-        setError(result.msg);
       } else {
-        setError("Upload failed.");
+        setError(result.msg || "Upload failed.");
       }
     } catch (err) {
       setError("Server error. Please try again.");
@@ -111,25 +141,22 @@ const Upload = () => {
             />
           </div>
 
-          {/* Existing image preview */}
           {formData.imageUrl && (
             <div>
-              <label className="block text-sm font-medium mb-1">Current Image:</label>
+              <label className="block text-sm font-medium mb-1">Preview:</label>
               <img src={formData.imageUrl} alt="preview" className="w-full h-52 object-cover rounded-md mb-2" />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium mb-1">Upload New Image</label>
+            <label className="block text-sm font-medium mb-1">Upload Image</label>
             <input
               type="file"
               name="image"
               accept="image/*"
               onChange={handleChange}
               className="w-full p-2 text-sm border h-10 border-emerald-300 rounded-md"
-              disabled
             />
-            <span className="text-xs text-gray-400">Image upload not supported yet.</span>
           </div>
         </div>
 
@@ -219,7 +246,7 @@ const Upload = () => {
           >
             {editId ? 'Update Item' : 'Upload Item'}
           </button>
-          </div>
+        </div>
       </form>
     </motion.div>
   );

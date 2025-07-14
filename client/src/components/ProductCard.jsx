@@ -19,10 +19,11 @@ const ProductCard = ({ item }) => {
       className="cursor-pointer bg-white/70 backdrop-blur-md border border-white/30 rounded-2xl shadow-lg overflow-hidden hover:scale-[1.03] transition-transform"
     >
       <img
-        src={item.imageUrl}
-        alt={item.title}
-        className="w-full h-52 object-cover"
-      />
+  src={item.image_url || '/placeholder.jpg'}
+  alt={item.title}
+  className="w-full h-52 object-cover"
+/>
+
       <div className="p-4">
         <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
         <p className="text-sm text-gray-500">{item.category}</p>

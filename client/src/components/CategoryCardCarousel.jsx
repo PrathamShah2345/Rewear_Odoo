@@ -1,4 +1,3 @@
-// src/components/CategoryCardCarousel.jsx
 import React, { useState, useEffect } from 'react';
 
 const CategoryCardCarousel = ({ title, images, onClick }) => {
@@ -6,15 +5,15 @@ const CategoryCardCarousel = ({ title, images, onClick }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIndex(prev => (prev + 1) % images.length);
-    }, 3000);
+      setIndex((prev) => (prev + 1) % images.length);
+    }, 2500); // change image every 2.5s
     return () => clearInterval(interval);
   }, [images.length]);
 
   return (
     <div
       onClick={onClick}
-      className="relative cursor-pointer rounded-2xl overflow-hidden group hover:scale-[1.03] transition-transform shadow-lg"
+      className="relative cursor-pointer rounded-2xl overflow-hidden group hover:scale-[1.03] transition-transform duration-200 shadow-lg"
     >
       <img
         src={images[index]}
