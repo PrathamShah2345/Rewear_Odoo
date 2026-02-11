@@ -1,139 +1,113 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getAllUsers, deleteUser } from '../services/api';
 
 const Admin = () => {
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOption, setSortOption] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Get existing saved users
-    const storedUsers = JSON.parse(localStorage.getItem('all_users')) || [];
-
-    // Also fetch current logged-in user and add to the list if not already there
-    const currentUser = JSON.parse(localStorage.getItem('user'));
-    if (currentUser && !storedUsers.some(u => u.email === currentUser.email)) {
-      const newUser = {
-        id: Date.now(),
-        name: currentUser.name || 'Unnamed',
-        email: currentUser.email,
-        city: currentUser.city || 'Unknown',
-        swaps: 0,
-        date: new Date().toISOString().slice(0, 10),
-      };
-      storedUsers.push(newUser);
-      localStorage.setItem('all_users', JSON.stringify(storedUsers));
+    if (!token) {
+      navigate('/login');
+      return;
     }
-
-    setUsers(storedUsers);
-  }, []);
-
-  const handleEdit = (id, field, value) => {
-    const updated = users.map(user => user.id === id ? { ...user, [field]: value } : user);
-    setUsers(updated);
-    localStorage.setItem('all_users', JSON.stringify(updated));
-  };
-
-  const handleDelete = (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-    const updated = users.filter(user => user.id !== id);
-    setUsers(updated);
-    localStorage.setItem('all_users', JSON.stringify(updated));
-  };
-
-  const filteredUsers = users
-    .filter(user =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.city.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sortOption === 'recent') {
-        return new Date(b.date) - new Date(a.date);
-      } else if (sortOption === 'oldest') {
-        return new Date(a.date) - new Date(b.date);
-      } else {
-        return 0;
+    const fetchUsers = async () => {
+      try {
+        const data = await getAllUsers(token);
+        setUsers(data);
+      } catch (err) {
+        setError('Access denied.');
       }
-    });
+      setLoading(false);
+    };
+    fetchUsers();
+  }, [token, navigate]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete user? This cannot be undone.')) return;
+    try {
+      const result = await deleteUser(id, token);
+      if (result.msg === 'User deleted successfully') {
+        setUsers(users.filter(user => user.id !== id));
+      }
+    } catch (err) {
+      alert('Delete failed.');
+    }
+  };
+
+  const filteredUsers = users.filter(user =>
+    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) return <div className="p-12 text-center">Loading...</div>;
+  if (error) return <div className="p-12 text-center text-red-600">{error}</div>;
 
   return (
-    <div className="px-6 py-8">
-      <h1 className="text-2xl font-bold mb-4">Admin Panel - Users Overview</h1>
+    <div className="min-h-screen bg-white text-black p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-end mb-8 border-b border-black pb-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">System Administration</p>
+            <h1 className="text-3xl font-bold uppercase tracking-tight">Users Database</h1>
+          </div>
+          <div className="w-1/3">
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-black text-sm"
+            />
+          </div>
+        </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Search by name, email or city..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="border px-4 py-2 rounded w-full sm:w-1/2"
-        />
-        <select
-          value={sortOption}
-          onChange={(e) => setSortOption(e.target.value)}
-          className="border px-4 py-2 rounded w-full sm:w-1/4"
-        >
-          <option value="">Sort by</option>
-          <option value="recent">Recent First</option>
-          <option value="oldest">Oldest First</option>
-        </select>
-      </div>
-
-      <div className="overflow-auto">
-        <table className="min-w-full bg-white border border-gray-200 text-sm">
-          <thead className="bg-gray-100 text-left">
-            <tr>
-              <th className="px-4 py-2 border">ID</th>
-              <th className="px-4 py-2 border">Name</th>
-              <th className="px-4 py-2 border">Email</th>
-              <th className="px-4 py-2 border">City</th>
-              <th className="px-4 py-2 border">Swaps</th>
-              <th className="px-4 py-2 border">Date</th>
-              <th className="px-4 py-2 border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map(user => (
-              <tr key={user.id} className="border-t">
-                <td className="px-4 py-2 border">{user.id}</td>
-                <td className="px-4 py-2 border">
-                  <input
-                    type="text"
-                    value={user.name}
-                    onChange={(e) => handleEdit(user.id, 'name', e.target.value)}
-                    className="w-full border px-2 py-1"
-                  />
-                </td>
-                <td className="px-4 py-2 border">
-                  <input
-                    type="email"
-                    value={user.email}
-                    onChange={(e) => handleEdit(user.id, 'email', e.target.value)}
-                    className="w-full border px-2 py-1"
-                  />
-                </td>
-                <td className="px-4 py-2 border">
-                  <input
-                    type="text"
-                    value={user.city}
-                    onChange={(e) => handleEdit(user.id, 'city', e.target.value)}
-                    className="w-full border px-2 py-1"
-                  />
-                </td>
-                <td className="px-4 py-2 border text-center">{user.swaps}</td>
-                <td className="px-4 py-2 border text-center">{user.date}</td>
-                <td className="px-4 py-2 border">
-                  <button
-                    onClick={() => handleDelete(user.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b-2 border-black">
+                <th className="py-4 text-xs font-bold uppercase tracking-widest">ID</th>
+                <th className="py-4 text-xs font-bold uppercase tracking-widest">User</th>
+                <th className="py-4 text-xs font-bold uppercase tracking-widest">Role</th>
+                <th className="py-4 text-xs font-bold uppercase tracking-widest text-right">Points</th>
+                <th className="py-4 text-xs font-bold uppercase tracking-widest text-right">Items</th>
+                <th className="py-4 text-xs font-bold uppercase tracking-widest text-right">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredUsers.map(user => (
+                <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <td className="py-4 text-sm text-gray-500">#{user.id}</td>
+                  <td className="py-4">
+                    <p className="font-bold text-sm">{user.username}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </td>
+                  <td className="py-4 text-sm">
+                    {user.role === 'admin' ? (
+                      <span className="bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider">Admin</span>
+                    ) : (
+                      <span className="text-gray-500 text-xs uppercase tracking-wider">User</span>
+                    )}
+                  </td>
+                  <td className="py-4 text-sm text-right font-medium">{user.points}</td>
+                  <td className="py-4 text-sm text-right font-medium">{user.items_count}</td>
+                  <td className="py-4 text-right">
+                    <button
+                      onClick={() => handleDelete(user.id)}
+                      className="text-gray-400 hover:text-red-600 text-xs uppercase font-bold tracking-widest transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

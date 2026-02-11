@@ -20,6 +20,7 @@ def upload_item():
         title = data.get('title'),
         description = data.get('description'),
         image_url = data.get('image_url'),
+        additional_images = data.get('additional_images'), # JSON string
         size = data.get('size'),
         condition = data.get('condition'),
         type = data.get('type'),
@@ -36,7 +37,16 @@ def upload_item():
 
 @items_bp.route('/', methods=['GET'])
 def get_all_items():
-    items = Item.query.order_by(Item.created_at.desc()).all()
+    tags = request.args.get('tags', '').strip()
+
+    query = Item.query.order_by(Item.created_at.desc())
+
+    if tags:
+        tag_list = [t.strip().lower() for t in tags.split(',') if t.strip()]
+        for tag in tag_list:
+            query = query.filter(Item.tags.ilike(f'%{tag}%'))
+
+    items = query.all()
 
     result = []
     for item in items:
@@ -45,6 +55,7 @@ def get_all_items():
             "title": item.title,
             "description": item.description,
             "image_url": item.image_url,
+            "additional_images": item.additional_images,
             "size": item.size,
             "condition": item.condition,
             "type": item.type,
@@ -55,3 +66,27 @@ def get_all_items():
         })
 
     return jsonify(result), 200
+
+
+@items_bp.route('/<int:item_id>', methods=['GET'])
+def get_item_by_id(item_id):
+    item = Item.query.get(item_id)
+    if not item:
+        return jsonify({"msg": "Item not found"}), 404
+
+    return jsonify({
+        "id": item.id,
+        "title": item.title,
+        "description": item.description,
+        "image_url": item.image_url,
+        "additional_images": item.additional_images,
+        "size": item.size,
+        "condition": item.condition,
+        "type": item.type,
+        "category": item.category,
+        "tags": item.tags,
+        "created_at": item.created_at,
+        "username": item.user.username,
+        "user_id": item.user_id,
+        "user_role": item.user.role
+    }), 200

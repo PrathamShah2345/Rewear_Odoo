@@ -4,6 +4,7 @@ from app.models.user import User
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta
 
+
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/register', methods=['POST'])
@@ -57,5 +58,7 @@ def current_user():
         "username": user.username,
         "email": user.email,
         "points": user.points,
+        "role": user.role,
+        "profile_image": user.profile_image,
         "created_at": user.created_at.isoformat()
     }), 200

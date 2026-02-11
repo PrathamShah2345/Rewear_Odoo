@@ -18,7 +18,7 @@ def create_app():
     jwt.init_app(app)
     CORS(
         app,
-        resources={r"/*": {"origins": ["http://localhost:5173", "https://rewear-odoo-lovat.vercel.app"]}},
+        resources={r"/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5000"]}},
         supports_credentials=True
     )
 
@@ -34,5 +34,9 @@ def create_app():
     from app.routes.swaps import swaps_bp
     app.register_blueprint(swaps_bp, url_prefix='/swaps')
 
+    # Ensure all tables exist (handles first run and new columns)
+    with app.app_context():
+        from app.models import User, Item, Swap  # noqa: F401
+        db.create_all()
 
     return app

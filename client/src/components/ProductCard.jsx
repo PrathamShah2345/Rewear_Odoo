@@ -1,47 +1,40 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const ProductCard = ({ item }) => {
-  const navigate = useNavigate();
-  const tagArray = item.tags ? item.tags.split(',').map(tag => tag.trim()) : [];
-
-  const handleClick = () => {
-    navigate(`/upload?id=${item.id}`);
-  };
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      onClick={handleClick}
-      className="cursor-pointer bg-white/70 backdrop-blur-md border border-white/30 rounded-2xl shadow-lg overflow-hidden hover:scale-[1.03] transition-transform"
-    >
-      <img
-  src={item.image_url || '/placeholder.jpg'}
-  alt={item.title}
-  className="w-full h-52 object-cover"
-/>
-
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
-        <p className="text-sm text-gray-500">{item.category}</p>
-
-        {tagArray.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {tagArray.map((tag, idx) => (
-              <span
-                key={idx}
-                className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-xs font-medium"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
+    <div className="group block h-full">
+      {/* Image Container - Square Aspect Ratio */}
+      <div className="relative aspect-square bg-gray-100 overflow-hidden mb-4">
+        <img
+          src={item.image_url || '/placeholder.jpg'}
+          alt={item.title}
+          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+        />
+        {/* Helper overlay for status/condition */}
+        {item.condition === 'New' && (
+          <span className="absolute top-2 left-2 bg-black text-white text-[10px] uppercase font-bold px-2 py-1 tracking-wider">
+            New Arrival
+          </span>
         )}
       </div>
-    </motion.div>
+
+      {/* Content - Minimal text below */}
+      <div className="space-y-1">
+        {/* Category / Brand eyebrow */}
+        <p className="text-[10px] text-gray-500 uppercase tracking-widest">{item.category}</p>
+
+        {/* Title */}
+        <h3 className="text-sm font-semibold text-black leading-tight group-hover:underline underline-offset-4 decoration-1">
+          {item.title}
+        </h3>
+
+        {/* Price/Points */}
+        <p className="text-sm text-gray-900 font-medium pt-1">
+          {/* Since we don't have price, use a placeholder or points */}
+          Swap Item
+        </p>
+      </div>
+    </div>
   );
 };
 

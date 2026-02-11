@@ -8,6 +8,8 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     points = db.Column(db.Integer, default=0)
+    role = db.Column(db.String(20), default='user')
+    profile_image = db.Column(db.String(200), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):

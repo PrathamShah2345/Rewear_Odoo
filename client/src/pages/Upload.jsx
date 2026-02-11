@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { uploadItem } from '../services/api';
+import { FiX, FiUploadCloud } from 'react-icons/fi';
 
 const Upload = () => {
   const token = localStorage.getItem('token');
@@ -13,36 +13,44 @@ const Upload = () => {
     size: '',
     condition: '',
     tags: '',
-    image: null,
-    imageUrl: '',
   });
+
+  const [files, setFiles] = useState([]); // Array of File objects
+  const [previews, setPreviews] = useState([]); // Array of URL strings for preview
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const editId = searchParams.get('id');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    // Skipped for now
+    // Skipped fetching logic for edit
   }, [editId]);
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'image' && files && files[0]) {
-      const file = files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          image: file,
-          imageUrl: reader.result, // preview
-        }));
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setFormData({ ...formData, [name]: value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length + files.length > 5) {
+      setError("Maximum 5 images allowed.");
+      return;
     }
+
+    setFiles(prev => [...prev, ...selectedFiles]);
+
+    // Generate previews
+    const newPreviews = selectedFiles.map(file => URL.createObjectURL(file));
+    setPreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const removeImage = (index) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -55,200 +63,175 @@ const Upload = () => {
       return;
     }
 
-    let uploadedImageUrl = formData.imageUrl;
+    if (files.length === 0) {
+      setError('Please upload at least one image.');
+      return;
+    }
 
-    // 🟢 Upload to Cloudinary if image selected
-    if (formData.image) {
-      const cloudData = new FormData();
-      cloudData.append('file', formData.image);
-      cloudData.append('upload_preset', 'rewear'); // Change this
-      cloudData.append('cloud_name', 'dzbfhy0rz'); // Change this
+    setUploading(true);
 
-      try {
+    try {
+      // 1. Upload all images to Cloudinary
+      const uploadPromises = files.map(async (file) => {
+        const cloudData = new FormData();
+        cloudData.append('file', file);
+        cloudData.append('upload_preset', 'rewear');
+        cloudData.append('cloud_name', 'dzbfhy0rz');
+
         const response = await fetch(`https://api.cloudinary.com/v1_1/dzbfhy0rz/image/upload`, {
           method: 'POST',
           body: cloudData,
         });
 
+        if (!response.ok) throw new Error('Image upload failed');
         const result = await response.json();
-        uploadedImageUrl = result.secure_url;
-      } catch (err) {
-        console.error(err);
-        setError('Image upload failed.');
-        return;
-      }
-    }
+        return result.secure_url;
+      });
 
-    const itemData = {
-      title: formData.title,
-      description: formData.description,
-      category: formData.category,
-      type: formData.type,
-      size: formData.size,
-      condition: formData.condition,
-      tags: formData.tags,
-      image_url: uploadedImageUrl,
-    };
+      const uploadedUrls = await Promise.all(uploadPromises);
 
-    try {
+      const mainImageUrl = uploadedUrls[0];
+      const additionalImages = uploadedUrls.slice(1);
+
+      // 2. Submit Item Data
+      const itemData = {
+        ...formData,
+        image_url: mainImageUrl,
+        additional_images: JSON.stringify(additionalImages),
+      };
+
       const result = await uploadItem(itemData, token);
       if (result.msg === "Item uploaded successfully") {
         setSuccess("Item uploaded successfully!");
-        setTimeout(() => navigate('/dashboard'), 1200);
+        setTimeout(() => navigate('/dashboard'), 1500);
       } else {
         setError(result.msg || "Upload failed.");
+        setUploading(false);
       }
     } catch (err) {
-      setError("Server error. Please try again.");
+      console.error(err);
+      setError("Upload failed. Please try again.");
+      setUploading(false);
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="pt-24 min-h-screen bg-gradient-to-tr from-green-50 via-emerald-100 to-green-200 px-4 py-8"
-    >
-      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Section */}
-        <div className="md:col-span-2 space-y-6 bg-white p-6 rounded-xl shadow border border-emerald-200">
-          <h2 className="text-2xl font-bold text-emerald-800">Item Details</h2>
+    <div className="min-h-screen bg-white text-black py-16 px-6">
+      <div className="max-w-4xl mx-auto">
 
-          {error && <div className="text-red-600 text-center text-sm">{error}</div>}
-          {success && <div className="text-green-600 text-center text-sm">{success}</div>}
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Item Title</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border rounded-md border-emerald-300"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              rows={4}
-              className="w-full px-4 py-2 border rounded-md border-emerald-300"
-            />
-          </div>
-
-          {formData.imageUrl && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Preview:</label>
-              <img src={formData.imageUrl} alt="preview" className="w-full h-52 object-cover rounded-md mb-2" />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Upload Image</label>
-            <input
-              type="file"
-              name="image"
-              accept="image/*"
-              onChange={handleChange}
-              className="w-full p-2 text-sm border h-10 border-emerald-300 rounded-md"
-            />
-          </div>
+        <div className="mb-12 border-b border-black pb-6">
+          <h1 className="text-3xl font-bold uppercase tracking-tight">List an Item</h1>
+          <p className="text-gray-500 mt-2">Share your pre-loved fashion. Upload up to 5 photos.</p>
         </div>
 
-        {/* Right Section */}
-        <div className="space-y-6 bg-white p-6 rounded-xl shadow border border-emerald-200">
-          <h2 className="text-2xl font-bold text-emerald-800">Categorization</h2>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-12">
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Category</label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md border-emerald-300"
-            >
-              <option value="">Select a category</option>
-              <option>Men</option>
-              <option>Women</option>
-              <option>Kids</option>
-              <option>Accessories</option>
-            </select>
-          </div>
+          {/* Section 1: Main Info */}
+          <div className="md:col-span-7 space-y-8 order-2 md:order-1">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest mb-2">Title</label>
+                <input type="text" name="title" value={formData.title} onChange={handleChange} required
+                  className="w-full border border-gray-300 p-4 focus:outline-none focus:border-black rounded-none placeholder-gray-400" placeholder="e.g. Vintage Denim Jacket" />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Listing Type</label>
-            <div className="flex items-center space-x-4 mt-1">
-              <label className="flex items-center space-x-2">
-                <input type="radio" name="type" value="Swap" checked={formData.type === 'Swap'} onChange={handleChange} />
-                <span>Swap</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input type="radio" name="type" value="Redeem" checked={formData.type === 'Redeem'} onChange={handleChange} />
-                <span>Redeem for Points</span>
-              </label>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest mb-2">Description</label>
+                <textarea name="description" value={formData.description} onChange={handleChange} required rows={6}
+                  className="w-full border border-gray-300 p-4 focus:outline-none focus:border-black rounded-none placeholder-gray-400" placeholder="Describe the item's history, fit, and feel..." />
+              </div>
+
+              {/* Categorization Grid */}
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2">Category</label>
+                  <select name="category" value={formData.category} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none">
+                    <option value="">Select</option>
+                    <option>Men</option>
+                    <option>Women</option>
+                    <option>Kids</option>
+                    <option>Accessories</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2">Condition</label>
+                  <select name="condition" value={formData.condition} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none">
+                    <option value="">Select</option>
+                    <option>New</option>
+                    <option>Like New</option>
+                    <option>Gently Used</option>
+                    <option>Worn</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2">Size</label>
+                  <select name="size" value={formData.size} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none">
+                    <option value="">Select</option>
+                    <option>XS</option>
+                    <option>S</option>
+                    <option>M</option>
+                    <option>L</option>
+                    <option>XL</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest mb-2">Type</label>
+                  <select name="type" value={formData.type} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none">
+                    <option value="">Select</option>
+                    <option>Swap</option>
+                    <option>Redeem</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest mb-2">Tags</label>
+                <input type="text" name="tags" value={formData.tags} onChange={handleChange}
+                  className="w-full border border-gray-300 p-3 focus:outline-none focus:border-black rounded-none" placeholder="Comma separated..." />
+              </div>
             </div>
+
+            {error && <p className="text-red-600 font-medium">{error}</p>}
+            {success && <p className="text-green-600 font-medium">{success}</p>}
+
+            <button type="submit" disabled={uploading} className="w-full bg-black text-white py-4 font-bold uppercase tracking-widest hover:bg-gray-800 transition disabled:bg-gray-400">
+              {uploading ? 'Uploading...' : (editId ? 'Update Listing' : 'Create Listing')}
+            </button>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Size</label>
-            <select
-              name="size"
-              value={formData.size}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md border-emerald-300"
-            >
-              <option value="">Select a size</option>
-              <option>XS</option>
-              <option>S</option>
-              <option>M</option>
-              <option>L</option>
-              <option>XL</option>
-              <option>XXL</option>
-            </select>
+          {/* Section 2: Image Upload */}
+          <div className="md:col-span-5 order-1 md:order-2">
+            <label className="block text-xs font-bold uppercase tracking-widest mb-2">Photos (Max 5)</label>
+
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {previews.map((src, idx) => (
+                <div key={idx} className="relative aspect-square bg-gray-100 group">
+                  <img src={src} alt="preview" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-1 right-1 bg-white rounded-full p-1 shadow hover:text-red-600 opacity-0 group-hover:opacity-100 transition"
+                  >
+                    <FiX />
+                  </button>
+                  {idx === 0 && <span className="absolute bottom-1 left-1 bg-black text-white text-[10px] px-2 py-0.5 font-bold uppercase">Main</span>}
+                </div>
+              ))}
+
+              {previews.length < 5 && (
+                <div className="relative aspect-square border-2 border-dashed border-gray-300 hover:border-black transition bg-gray-50 flex flex-col items-center justify-center cursor-pointer text-gray-400 hover:text-black">
+                  <FiUploadCloud className="w-8 h-8 mb-2" />
+                  <span className="text-xs font-bold uppercase">Add Photo</span>
+                  <input type="file" multiple accept="image/*" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-gray-400">First image will be the main display image.</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Condition</label>
-            <select
-              name="condition"
-              value={formData.condition}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md border-emerald-300"
-            >
-              <option value="">Select condition</option>
-              <option>New</option>
-              <option>Like New</option>
-              <option>Gently Used</option>
-              <option>Worn</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Tags</label>
-            <input
-              type="text"
-              name="tags"
-              placeholder="e.g. cotton, summer, casual"
-              value={formData.tags}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-emerald-300 rounded-md"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition duration-200"
-          >
-            {editId ? 'Update Item' : 'Upload Item'}
-          </button>
-        </div>
-      </form>
-    </motion.div>
+        </form>
+      </div>
+    </div>
   );
 };
 

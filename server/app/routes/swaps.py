@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import Swap, User, Item
+from app.utils.points import update_points
 from app import db
 
 swaps_bp  = Blueprint('swaps', __name__)
@@ -69,7 +70,20 @@ def respond_swap(swap_id):
         
         item.user_id = swap.requested_by
         swap.status = 'accepted'
-        db.session.add(item)
+
+        # Cancel all other pending swaps for this item
+        other_pending = Swap.query.filter(
+            Swap.item_id == swap.item_id,
+            Swap.id != swap.id,
+            Swap.status == 'pending'
+        ).all()
+        for other in other_pending:
+            other.status = 'cancelled'
+
+        # Award points to both users
+        update_points(swap.requested_by, 10)  # requester gets 10 points
+        update_points(swap.requested_to, 10)  # owner gets 10 points
+
         db.session.commit()
 
         return jsonify({"msg": "Swap accepted, item ownership updated"}), 200
@@ -78,6 +92,27 @@ def respond_swap(swap_id):
     db.session.commit()
 
     return jsonify({"msg": f"Swap {new_status}"}), 200
+
+
+@swaps_bp.route('/<int:swap_id>', methods=['DELETE'])
+@jwt_required()
+def cancel_swap(swap_id):
+    user_id = int(get_jwt_identity())
+
+    swap = Swap.query.filter_by(id=swap_id).first()
+    if not swap:
+        return jsonify({"error": "Swap not found"}), 404
+
+    if swap.requested_by != user_id:
+        return jsonify({"error": "You can only cancel your own swap requests"}), 403
+
+    if swap.status != 'pending':
+        return jsonify({"error": f"Cannot cancel a swap that is already {swap.status}"}), 400
+
+    swap.status = 'cancelled'
+    db.session.commit()
+
+    return jsonify({"msg": "Swap request cancelled"}), 200
 
 
 @swaps_bp.route('/mine', methods=['GET'])
@@ -111,4 +146,3 @@ def my_swaps():
         "sent": [format_swap(swap) for swap in sent],
         "received": [format_swap(swap) for swap in received]
     }), 200
-
