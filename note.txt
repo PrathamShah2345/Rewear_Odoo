@@ -1,0 +1,194 @@
+Rewear_Odoo – Project Wiring Guide (Explain Like a Pro)
+======================================================
+
+Purpose (One‑liner)
+------------------
+ReWear is a full‑stack app for listing, swapping, and optionally buying pre‑loved items. It has a React (Vite) frontend and a Flask + PostgreSQL backend.
+
+High‑Level Architecture
+-----------------------
+1) Frontend (client/)
+   - Single‑page React app (Vite)
+   - Talks to backend over REST (fetch)
+   - Handles auth tokens in localStorage
+
+2) Backend (server/)
+   - Flask app factory with Blueprints
+   - SQLAlchemy models + Alembic migrations
+   - JWT auth for protected routes
+   - PostgreSQL DB
+
+
+How the app boots (wiring flow)
+-------------------------------
+Frontend:
+1. Vite starts from client/src/main.jsx.
+2. main.jsx renders <App /> from client/src/App.jsx.
+3. App.jsx defines routes (React Router) and global layout:
+   - Navbar (CardNav-based)
+   - Routes (Home, Items, ItemDetails, Login, Register, Dashboard, Upload, Admin)
+   - Footer
+4. Pages call API helpers from client/src/services/api.js.
+5. API helpers use VITE_API (client/.env) for backend base URL.
+
+Backend:
+1. server/run.py creates the Flask app using create_app() in server/app/__init__.py.
+2. create_app() loads config, initializes:
+   - db (SQLAlchemy)
+   - jwt (JWT auth)
+   - migrate (Alembic)
+   - CORS
+3. Blueprints are registered:
+   - /auth (auth routes)
+   - /items (item routes)
+   - /users (user routes)
+   - /swaps (swap routes)
+
+
+Frontend structure (client/)
+----------------------------
+client/
+  public/
+    logo.png, favicon.ico, category images
+
+  src/
+    main.jsx
+      - React entry point; mounts the app
+
+    App.jsx
+      - Routes + layout
+      - ProtectedRoute: redirects to /login if no token
+      - Adds top padding except on Login/Register so navbar doesn’t overlap
+
+    index.css
+      - Base styles + custom utilities
+      - Theme overrides (neon theme)
+      - UI helpers (select/dropzone hover)
+
+    services/
+      api.js
+        - All fetch calls to backend:
+          register(), login(), getCurrentUser()
+          getItems(), getItemById(), uploadItem()
+          swaps(), users(), admin, etc.
+        - Uses VITE_API from .env
+
+    components/
+      Navbar.jsx
+        - Uses CardNav to render the top nav
+        - Theme switcher (Light/Fluor)
+        - Reads current user (JWT) to show role‑based options
+
+      CardNav.jsx + CardNav.css
+        - The animated card‑style nav menu
+        - Theme dropdown built in
+
+      Squares.jsx + Squares.css
+        - Animated grid background used in Login/Register and other pages
+
+      Footer.jsx
+        - Static footer (admin link only if admin user)
+
+      ProductCard.jsx
+        - Reusable item card (image + title + price)
+
+    pages/
+      Home.jsx
+        - Hero, categories, demo products
+
+      ItemListing.jsx
+        - Fetches items, applies filters (category/query)
+        - Pagination (12 per page)
+
+      ItemDetails.jsx
+        - Product detail view
+        - Swap request button + optional Buy Now if price exists
+
+      Upload.jsx
+        - Form to upload item + images
+        - Uses Cloudinary for image upload
+        - Sends item data to backend (includes price)
+
+      Login.jsx / Register.jsx
+        - Auth forms
+        - Styled with animated Squares background
+
+      Dashboard.jsx
+        - User profile summary
+        - Incoming/outgoing swap requests
+        - User items
+
+      Admin.jsx
+        - Admin user list + delete user
+
+
+Backend structure (server/)
+---------------------------
+server/
+  run.py
+    - Entry point for Flask server
+    - Checks DB connection before starting
+
+  app/
+    __init__.py
+      - create_app() config
+      - init SQLAlchemy, JWT, CORS, Migrate
+      - register blueprints
+
+    models/
+      user.py
+        - User model (username, email, password hash, role, profile image)
+      item.py
+        - Item model (title, description, images, price, tags, etc.)
+      swap.py
+        - Swap model (relations between users/items)
+
+    routes/
+      auth.py
+        - /auth/register, /auth/login, /auth/me
+      items.py
+        - /items GET/POST
+        - /items/<id> GET
+      users.py
+        - /users/all, /users/profile/update, etc.
+      swaps.py
+        - swap request, respond, list
+
+  migrations/
+    - Alembic migration scripts
+    - Tracks DB schema changes (e.g., added price, profile_image)
+
+  .env
+    - DB connection, JWT secret, server port
+
+
+Data flow (example: Upload item)
+-------------------------------
+1) User opens Upload page (client/src/pages/Upload.jsx).
+2) Images upload to Cloudinary (client‑side).
+3) App sends item JSON to backend via uploadItem() (api.js).
+4) Backend /items POST creates Item row in DB (server/app/routes/items.py).
+5) New item appears in listing and details endpoints.
+
+
+Data flow (example: Login)
+--------------------------
+1) Login form calls login() in api.js.
+2) /auth/login returns JWT access_token.
+3) Frontend stores token in localStorage.
+4) getCurrentUser() fetches user info.
+5) ProtectedRoute allows access to dashboard/upload/admin.
+
+
+How to explain it in interviews (short version)
+-----------------------------------------------
+“This is a full‑stack React + Flask app. React handles UI and routes, and calls Flask REST endpoints through a small api.js wrapper. Flask uses SQLAlchemy models and Alembic migrations to manage a Postgres database. Authentication is JWT‑based. The app supports listing items, swapping, and optional purchase via price. The UI uses custom components like CardNav and animated Squares backgrounds, and includes a theme toggle that applies global neon styles.”
+
+
+Where to look first (debugging)
+-------------------------------
+1) Client UI issues: client/src/pages + components
+2) API request issues: client/src/services/api.js
+3) Backend errors: server/app/routes + server/app/models
+4) DB schema issues: server/migrations
+
