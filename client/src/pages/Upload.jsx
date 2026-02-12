@@ -13,6 +13,7 @@ const Upload = () => {
     size: '',
     condition: '',
     tags: '',
+    price: '',
   });
 
   const [files, setFiles] = useState([]); // Array of File objects
@@ -96,6 +97,7 @@ const Upload = () => {
       // 2. Submit Item Data
       const itemData = {
         ...formData,
+        price: formData.price ? Number(formData.price) : null,
         image_url: mainImageUrl,
         additional_images: JSON.stringify(additionalImages),
       };
@@ -130,22 +132,22 @@ const Upload = () => {
           <div className="md:col-span-7 space-y-8 order-2 md:order-1">
             <div className="space-y-6">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-widest mb-2">Title</label>
-                <input type="text" name="title" value={formData.title} onChange={handleChange} required
+                <label htmlFor="upload-title" className="block text-xs font-bold uppercase tracking-widest mb-2">Title</label>
+                <input id="upload-title" type="text" name="title" value={formData.title} onChange={handleChange} required
                   className="w-full border border-gray-300 p-4 focus:outline-none focus:border-black rounded-none placeholder-gray-400" placeholder="e.g. Vintage Denim Jacket" />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-widest mb-2">Description</label>
-                <textarea name="description" value={formData.description} onChange={handleChange} required rows={6}
+                <label htmlFor="upload-description" className="block text-xs font-bold uppercase tracking-widest mb-2">Description</label>
+                <textarea id="upload-description" name="description" value={formData.description} onChange={handleChange} required rows={6}
                   className="w-full border border-gray-300 p-4 focus:outline-none focus:border-black rounded-none placeholder-gray-400" placeholder="Describe the item's history, fit, and feel..." />
               </div>
 
               {/* Categorization Grid */}
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-2">Category</label>
-                  <select name="category" value={formData.category} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none">
+                  <label htmlFor="upload-category" className="block text-xs font-bold uppercase tracking-widest mb-2">Category</label>
+                  <select id="upload-category" name="category" value={formData.category} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none select-cool">
                     <option value="">Select</option>
                     <option>Men</option>
                     <option>Women</option>
@@ -154,8 +156,8 @@ const Upload = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-2">Condition</label>
-                  <select name="condition" value={formData.condition} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none">
+                  <label htmlFor="upload-condition" className="block text-xs font-bold uppercase tracking-widest mb-2">Condition</label>
+                  <select id="upload-condition" name="condition" value={formData.condition} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none select-cool">
                     <option value="">Select</option>
                     <option>New</option>
                     <option>Like New</option>
@@ -164,8 +166,8 @@ const Upload = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-2">Size</label>
-                  <select name="size" value={formData.size} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none">
+                  <label htmlFor="upload-size" className="block text-xs font-bold uppercase tracking-widest mb-2">Size</label>
+                  <select id="upload-size" name="size" value={formData.size} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none select-cool">
                     <option value="">Select</option>
                     <option>XS</option>
                     <option>S</option>
@@ -175,8 +177,8 @@ const Upload = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest mb-2">Type</label>
-                  <select name="type" value={formData.type} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none">
+                  <label htmlFor="upload-type" className="block text-xs font-bold uppercase tracking-widest mb-2">Type</label>
+                  <select id="upload-type" name="type" value={formData.type} onChange={handleChange} className="w-full border border-gray-300 p-3 bg-white focus:outline-none focus:border-black rounded-none select-cool">
                     <option value="">Select</option>
                     <option>Swap</option>
                     <option>Redeem</option>
@@ -185,9 +187,24 @@ const Upload = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-widest mb-2">Tags</label>
-                <input type="text" name="tags" value={formData.tags} onChange={handleChange}
+                <label htmlFor="upload-tags" className="block text-xs font-bold uppercase tracking-widest mb-2">Tags</label>
+                <input id="upload-tags" type="text" name="tags" value={formData.tags} onChange={handleChange}
                   className="w-full border border-gray-300 p-3 focus:outline-none focus:border-black rounded-none" placeholder="Comma separated..." />
+              </div>
+
+              <div>
+                <label htmlFor="upload-price" className="block text-xs font-bold uppercase tracking-widest mb-2">Price (optional)</label>
+                <input
+                  id="upload-price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 p-3 focus:outline-none focus:border-black rounded-none"
+                  placeholder="e.g. 49.99"
+                />
               </div>
             </div>
 
@@ -219,10 +236,10 @@ const Upload = () => {
               ))}
 
               {previews.length < 5 && (
-                <div className="relative aspect-square border-2 border-dashed border-gray-300 hover:border-black transition bg-gray-50 flex flex-col items-center justify-center cursor-pointer text-gray-400 hover:text-black">
+                <div className="relative aspect-square border-2 border-dashed border-gray-300 hover:border-black transition bg-gray-50 flex flex-col items-center justify-center cursor-pointer text-gray-400 hover:text-black upload-dropzone">
                   <FiUploadCloud className="w-8 h-8 mb-2" />
                   <span className="text-xs font-bold uppercase">Add Photo</span>
-                  <input type="file" multiple accept="image/*" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  <input type="file" multiple accept="image/*" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" aria-label="Add photos" />
                 </div>
               )}
             </div>

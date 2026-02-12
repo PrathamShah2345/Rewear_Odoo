@@ -1,12 +1,13 @@
 // src/components/Navbar.jsx
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../services/api";
-import { useState, useEffect } from "react";
-import { FiSearch, FiUser, FiShoppingBag, FiMenu } from "react-icons/fi"; // Need to install react-icons if not present
+import { useState, useEffect, useMemo } from "react";
+import CardNav from "./CardNav";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
+  const [theme, setTheme] = useState("light");
   const token = localStorage.getItem("token");
 
   async function getUser() {
@@ -21,6 +22,29 @@ const Navbar = () => {
     }
   }
 
+  useEffect(() => {
+    getUser();
+  }, [token]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "neon") {
+      setTheme("neon");
+      document.documentElement.classList.add("theme-neon");
+    }
+  }, []);
+
+  const setThemeMode = (next) => {
+    const value = next === "neon" ? "neon" : "light";
+    setTheme(value);
+    if (value === "neon") {
+      document.documentElement.classList.add("theme-neon");
+    } else {
+      document.documentElement.classList.remove("theme-neon");
+    }
+    localStorage.setItem("theme", value);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -28,75 +52,71 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  useEffect(() => {
-    getUser();
-  }, [token]);
+  const items = useMemo(() => {
+    const base = [
+      {
+        label: "Shop",
+        bgColor: "#0D0716",
+        textColor: "#fff",
+        links: [
+          { label: "All Items", ariaLabel: "All Items", to: "/items" },
+          { label: "Men", ariaLabel: "Shop Men", to: "/items?category=Men" },
+          { label: "Women", ariaLabel: "Shop Women", to: "/items?category=Women" },
+        ],
+      },
+      {
+        label: "Sell",
+        bgColor: "#170D27",
+        textColor: "#fff",
+        links: [
+          { label: "Upload", ariaLabel: "Upload Item", to: "/upload" },
+          { label: "Dashboard", ariaLabel: "My Dashboard", to: "/dashboard" },
+        ],
+      },
+      {
+        label: "Account",
+        bgColor: "#271E37",
+        textColor: "#fff",
+        links: currentUser
+          ? [
+              { label: "Profile", ariaLabel: "Profile", to: "/dashboard" },
+              { label: "Logout", ariaLabel: "Logout", onClick: handleLogout },
+            ]
+          : [
+              { label: "Login", ariaLabel: "Login", to: "/login" },
+              { label: "Register", ariaLabel: "Register", to: "/register" },
+            ],
+      },
+    ];
+
+    if (currentUser?.role === "admin") {
+      base.push({
+        label: "Admin",
+        bgColor: "#3B0D0D",
+        textColor: "#fff",
+        links: [{ label: "Dashboard", ariaLabel: "Admin Dashboard", to: "/admin" }],
+      });
+    }
+
+    return base;
+  }, [currentUser]);
 
   return (
-    <nav className="sticky top-0 w-full z-50 bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-
-          {/* Left: Mobile Menu & Search */}
-          <div className="flex items-center space-x-4">
-            <button className="text-black md:hidden">
-              <FiMenu className="w-6 h-6" />
-            </button>
-            <button className="text-black hidden md:block">
-              <FiSearch className="w-5 h-5 hover:text-gray-600 transition" />
-            </button>
-          </div>
-
-          {/* Center: Logo */}
-          <div className="flex-shrink-0 flex items-center justify-center">
-            <Link to="/" className="flex flex-col items-center">
-              <span className="text-2xl font-bold tracking-tighter uppercase">ReWear</span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 -mt-1">Design Store</span>
-            </Link>
-          </div>
-
-          {/* Right: User & Actions */}
-          <div className="flex items-center space-x-6 text-sm font-medium">
-            <div className="hidden md:flex items-center space-x-6">
-              <Link to="/items" className="hover:underline underline-offset-4">Shop</Link>
-              <Link to="/upload" className="hover:underline underline-offset-4">Sell</Link>
-              {currentUser?.role === 'admin' && (
-                <Link to="/admin" className="text-red-600 hover:underline underline-offset-4">Admin</Link>
-              )}
-            </div>
-
-            <div className="flex items-center space-x-4">
-              {currentUser ? (
-                <div className="relative group">
-                  <Link to="/dashboard" className="flex items-center text-black hover:text-gray-600">
-                    {currentUser.profile_image ? (
-                      <img src={currentUser.profile_image} alt="User" className="w-6 h-6 rounded-full object-cover border border-gray-300" />
-                    ) : (
-                      <FiUser className="w-5 h-5" />
-                    )}
-                  </Link>
-                  {/* Dropdown for logout could go here, for now just dashboard click */}
-                  <button onClick={handleLogout} className="hidden group-hover:block absolute right-0 top-full bg-white border p-2 text-xs w-20 shadow-lg">Logout</button>
-                </div>
-              ) : (
-                <Link to="/login" className="text-black hover:text-gray-600">
-                  Login
-                </Link>
-              )}
-
-              <Link to="/dashboard" className="text-black hover:text-gray-600 relative">
-                <FiShoppingBag className="w-5 h-5" />
-                {currentUser?.points > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-black text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-                    {Math.min(currentUser.points, 99)}
-                  </span>
-                )}
-              </Link>
-            </div>
-          </div>
-
-        </div>
-      </div>
+    <nav className="relative w-full z-50">
+      <CardNav
+        logo="/logo.png"
+        logoAlt="ReWear"
+        items={items}
+        baseColor={theme === "neon" ? "#0b0f1a" : "#ffffff"}
+        menuColor={theme === "neon" ? "#e6f4ff" : "#000000"}
+        buttonBgColor={theme === "neon" ? "#00f5ff" : "#111111"}
+        buttonTextColor={theme === "neon" ? "#001018" : "#ffffff"}
+        ctaLabel={currentUser ? "Dashboard" : "Login"}
+        ctaTo={currentUser ? "/dashboard" : "/login"}
+        onCtaClick={currentUser ? undefined : undefined}
+        theme={theme === "neon" ? "neon" : "light"}
+        onThemeChange={setThemeMode}
+      />
     </nav>
   );
 };

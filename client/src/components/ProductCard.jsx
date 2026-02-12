@@ -6,7 +6,7 @@ const ProductCard = ({ item }) => {
       {/* Image Container - Square Aspect Ratio */}
       <div className="relative aspect-square bg-gray-100 overflow-hidden mb-4">
         <img
-          src={item.image_url || '/placeholder.jpg'}
+          src={item.image_url || '/logo.png'}
           alt={item.title}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
         />
@@ -30,8 +30,9 @@ const ProductCard = ({ item }) => {
 
         {/* Price/Points */}
         <p className="text-sm text-gray-900 font-medium pt-1">
-          {/* Since we don't have price, use a placeholder or points */}
-          Swap Item
+          {item.price != null && item.price !== ''
+            ? `$${Number(item.price).toFixed(2)}`
+            : 'Swap Item'}
         </p>
       </div>
     </div>

@@ -17,6 +17,149 @@ body {
   min-height: 100vh;
 }
 
+/* Neon theme */
+.theme-neon body {
+  background: radial-gradient(1200px 800px at 20% 10%, rgba(0, 245, 255, 0.12), rgba(0, 0, 0, 0)) ,
+              radial-gradient(1000px 700px at 80% 20%, rgba(160, 0, 255, 0.12), rgba(0, 0, 0, 0)) ,
+              #070a10;
+  color: #e6f4ff;
+}
+
+.theme-neon a {
+  color: #a7f3ff;
+}
+
+.theme-neon .card-nav {
+  background-color: #0b0f1a !important;
+  border-color: rgba(0, 245, 255, 0.18);
+  box-shadow: 0 10px 30px rgba(0, 245, 255, 0.12), 0 0 40px rgba(160, 0, 255, 0.08);
+}
+
+.theme-neon .card-nav-theme-select {
+  border-color: rgba(0, 245, 255, 0.45);
+  color: #a7f3ff;
+}
+
+.theme-neon .card-nav-theme-select:hover {
+  border-color: rgba(0, 245, 255, 0.75);
+}
+
+.theme-neon input,
+.theme-neon textarea,
+.theme-neon select {
+  background-color: rgba(7, 10, 16, 0.6) !important;
+  border-color: rgba(0, 245, 255, 0.2) !important;
+  color: #e6f4ff !important;
+}
+
+.theme-neon input::placeholder,
+.theme-neon textarea::placeholder {
+  color: rgba(230, 244, 255, 0.6) !important;
+}
+
+.theme-neon button {
+  border-color: rgba(0, 245, 255, 0.25);
+}
+
+.theme-neon .btn-primary {
+  background-color: #00f5ff;
+  color: #001018;
+}
+
+.theme-neon .btn-secondary {
+  background-color: transparent;
+  color: #a7f3ff;
+  border-color: rgba(0, 245, 255, 0.3);
+}
+
+.theme-neon .bg-white {
+  background-color: transparent !important;
+}
+
+.theme-neon .text-black {
+  color: #e6f4ff !important;
+}
+
+.theme-neon .border-black {
+  border-color: rgba(0, 245, 255, 0.35) !important;
+}
+
+.theme-neon .bg-\[\#F5F5F5\] {
+  background-color: rgba(9, 14, 24, 0.75) !important;
+}
+
+.theme-neon .bg-\[\#F5F5F5\]\/90 {
+  background-color: rgba(9, 14, 24, 0.75) !important;
+}
+
+.theme-neon .bg-white\/70,
+.theme-neon .bg-white\/80,
+.theme-neon .bg-white\/90 {
+  background-color: rgba(9, 14, 24, 0.7) !important;
+}
+
+.theme-neon .border-gray-200,
+.theme-neon .border-gray-300 {
+  border-color: rgba(0, 245, 255, 0.2) !important;
+}
+
+.theme-neon .text-gray-500,
+.theme-neon .text-gray-600,
+.theme-neon .text-gray-700 {
+  color: rgba(230, 244, 255, 0.7) !important;
+}
+
+.theme-neon .bg-gray-200,
+.theme-neon .bg-gray-100 {
+  background-color: rgba(9, 14, 24, 0.7) !important;
+}
+
+.theme-neon select option {
+  background-color: #0b0f1a;
+  color: #e6f4ff;
+}
+
+.theme-neon .select-cool {
+  border-color: rgba(0, 245, 255, 0.35) !important;
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.08);
+}
+
+.theme-neon .select-cool:hover,
+.theme-neon .select-cool:focus {
+  box-shadow: 0 0 28px rgba(0, 245, 255, 0.18);
+}
+
+.theme-neon .upload-dropzone {
+  border-color: rgba(0, 245, 255, 0.35) !important;
+  background: radial-gradient(400px 300px at 30% 20%, rgba(0, 245, 255, 0.08), transparent),
+              radial-gradient(380px 280px at 70% 60%, rgba(160, 0, 255, 0.08), transparent),
+              rgba(9, 14, 24, 0.7) !important;
+  color: rgba(230, 244, 255, 0.7) !important;
+}
+
+.theme-neon .upload-dropzone:hover {
+  box-shadow: 0 0 28px rgba(0, 245, 255, 0.2);
+}
+
+/* Upload accents */
+.select-cool {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.select-cool:hover,
+.select-cool:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.upload-dropzone {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.upload-dropzone:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
 /* Custom Utilities for MoMA Style */
 .btn-primary {
   background-color: black;

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -20,25 +20,34 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+const AppContent = () => {
+  const location = useLocation();
+  const noNavOffset = location.pathname === "/login" || location.pathname === "/register";
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className={`flex-grow ${noNavOffset ? "" : "pt-24"}`}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/items" element={<ItemListing />} />
+          <Route path="/item/:id" element={<ItemDetails />} />
+          <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
 function App() {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/items" element={<ItemListing />} />
-            <Route path="/item/:id" element={<ItemDetails />} />
-            <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <AppContent />
     </Router>
   );
 }

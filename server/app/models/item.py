@@ -7,6 +7,7 @@ class Item(db.Model):
     description = db.Column(db.String(500), nullable=True)
     image_url = db.Column(db.String(200), nullable=True)
     additional_images = db.Column(db.Text, nullable=True) # Stores JSON string of list ["url1", "url2"]
+    price = db.Column(db.Float, nullable=True)
     size = db.Column(db.String(50))
     condition = db.Column(db.String(50))
     type = db.Column(db.String(50))

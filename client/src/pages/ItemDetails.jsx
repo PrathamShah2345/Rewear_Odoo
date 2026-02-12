@@ -6,12 +6,12 @@ import ProductCard from '../components/ProductCard';
 
 // Demo Data (Matches Home/Listing demo data)
 const DEMO_ITEMS = {
-  101: { id: 101, title: "Minimalist Trench Coat", category: "Women", type: "Swap", size: "M", condition: "Like New", tags: "minimal, coat, beige", description: "A timeless beige trench coat with a clean silhouette. Perfect for transitional weather. Features a belt and deep pockets.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1936&auto=format&fit=crop", points: 120, created_at: new Date().toISOString() },
-  102: { id: 102, title: "Vintage Leather Satchel", category: "Accessories", type: "Swap", size: "One Size", condition: "Gently Used", tags: "vintage, leather, bag", description: "Authentic vintage leather satchel. Durable and stylish with a beautiful patina developed over time.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1590874102987-fdaef7d57a85?q=80&w=2080&auto=format&fit=crop", points: 85, created_at: new Date().toISOString() },
-  103: { id: 103, title: "Oversized Denim Jacket", category: "Men", type: "Swap", size: "L", condition: "New", tags: "denim, jacket, oversized", description: "Brand new oversized denim jacket. Never worn. classic wash that goes with everything.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=1974&auto=format&fit=crop", points: 200, created_at: new Date().toISOString() },
-  104: { id: 104, title: "Ceramic Vase Collection", category: "Home", type: "Swap", size: "N/A", condition: "New", tags: "decor, ceramic, vase", description: "Set of 3 handmade ceramic vases. Minimalist design ideal for modern interiors.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1612196808214-b7e239e5f6b7?q=80&w=1974&auto=format&fit=crop", points: 150, created_at: new Date().toISOString() },
-  105: { id: 105, title: "Classic White Tee", category: "Women", type: "Swap", size: "S", condition: "New", tags: "basic, cotton, white", description: "Premium cotton white t-shirt. Essential wardrobe staple.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1780&auto=format&fit=crop", points: 40, created_at: new Date().toISOString() },
-  106: { id: 106, title: "Leather Boots", category: "Men", type: "Swap", size: "10 (US)", condition: "Worn", tags: "boots, leather, brown", description: "Sturdy leather boots with plenty of life left. Recently resoled.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1638247025967-b4e38f787b76?q=80&w=1974&auto=format&fit=crop", points: 90, created_at: new Date().toISOString() },
+  101: { id: 101, title: "Minimalist Trench Coat", category: "Women", type: "Swap", size: "M", condition: "Like New", tags: "minimal, coat, beige", description: "A timeless beige trench coat with a clean silhouette. Perfect for transitional weather. Features a belt and deep pockets.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1936&auto=format&fit=crop", price: 85, points: 120, created_at: new Date().toISOString() },
+  102: { id: 102, title: "Vintage Leather Satchel", category: "Accessories", type: "Swap", size: "One Size", condition: "Gently Used", tags: "vintage, leather, bag", description: "Authentic vintage leather satchel. Durable and stylish with a beautiful patina developed over time.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1590874102987-fdaef7d57a85?q=80&w=2080&auto=format&fit=crop", price: 120, points: 85, created_at: new Date().toISOString() },
+  103: { id: 103, title: "Oversized Denim Jacket", category: "Men", type: "Swap", size: "L", condition: "New", tags: "denim, jacket, oversized", description: "Brand new oversized denim jacket. Never worn. classic wash that goes with everything.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=1974&auto=format&fit=crop", price: 95, points: 200, created_at: new Date().toISOString() },
+  104: { id: 104, title: "Ceramic Vase Collection", category: "Home", type: "Redeem", size: "N/A", condition: "New", tags: "decor, ceramic, vase", description: "Set of 3 handmade ceramic vases. Minimalist design ideal for modern interiors.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1612196808214-b7e239e5f6b7?q=80&w=1974&auto=format&fit=crop", price: 60, points: 150, created_at: new Date().toISOString() },
+  105: { id: 105, title: "Classic White Tee", category: "Women", type: "Redeem", size: "S", condition: "New", tags: "basic, cotton, white", description: "Premium cotton white t-shirt. Essential wardrobe staple.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1780&auto=format&fit=crop", price: 35, points: 40, created_at: new Date().toISOString() },
+  106: { id: 106, title: "Leather Boots", category: "Men", type: "Redeem", size: "10 (US)", condition: "Worn", tags: "boots, leather, brown", description: "Sturdy leather boots with plenty of life left. Recently resoled.", username: "DemoUser", image_url: "https://images.unsplash.com/photo-1638247025967-b4e38f787b76?q=80&w=1974&auto=format&fit=crop", price: 75, points: 90, created_at: new Date().toISOString() },
 };
 
 
@@ -23,6 +23,7 @@ const ItemDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [swapMsg, setSwapMsg] = useState('');
+  const [buyMsg, setBuyMsg] = useState('');
 
   // Accordion states
   const [openSection, setOpenSection] = useState('description'); // 'description', 'details', or null
@@ -127,6 +128,15 @@ const ItemDetails = () => {
     }
   };
 
+  const handleBuy = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    setBuyMsg('Purchase flow coming soon.');
+  };
+
   if (loading) return <div className="h-screen flex items-center justify-center text-sm font-medium tracking-wide">Loading...</div>;
   if (!item && !loading) return <div className="h-screen flex items-center justify-center text-sm">Item not found.</div>;
 
@@ -168,25 +178,40 @@ const ItemDetails = () => {
             <div className="border-b border-black pb-6 space-y-4">
               <span className="text-xs font-bold uppercase tracking-widest text-gray-500">{item.category} / {item.type}</span>
               <h1 className="text-3xl md:text-4xl font-semibold leading-tight">{item.title}</h1>
-              <div className="text-xl font-medium pt-2">Available for Swap</div>
+              <div className="text-xl font-medium pt-2">
+                {item.price != null && item.price !== '' ? `Price: $${Number(item.price).toFixed(2)}` : 'Available for Swap'}
+              </div>
             </div>
 
             {/* Action Area */}
             <div className="space-y-4 pt-2">
               {swapMsg && <div className={`p-3 text-sm text-center font-bold uppercase tracking-wide ${swapMsg.includes('Failed') ? 'bg-red-100 text-red-600' : 'bg-black text-white'}`}>{swapMsg}</div>}
+              {buyMsg && <div className="p-3 text-sm text-center font-bold uppercase tracking-wide bg-gray-100 text-gray-800">{buyMsg}</div>}
 
               {localStorage.getItem('token') &&
                 item.username !== (JSON.parse(localStorage.getItem('user'))?.username) ? (
-                <button
-                  onClick={handleSwapRequest}
-                  disabled={swapMsg === 'Sending request...'}
-                  className="w-full bg-black text-white py-4 font-bold uppercase tracking-widest text-sm hover:bg-gray-800 transition-colors disabled:bg-gray-500"
-                >
-                  {swapMsg === 'Sending request...' ? 'Processing...' : 'Request Swap'}
-                </button>
+                <div className="space-y-3">
+                  <button
+                    onClick={handleSwapRequest}
+                    disabled={swapMsg === 'Sending request...'}
+                    className="w-full bg-black text-white py-4 font-bold uppercase tracking-widest text-sm hover:bg-gray-800 transition-colors disabled:bg-gray-500"
+                  >
+                    {swapMsg === 'Sending request...' ? 'Processing...' : 'Request Swap'}
+                  </button>
+                  {item.price != null && item.price !== '' && (
+                    <button
+                      onClick={handleBuy}
+                      className="w-full border border-black text-black py-4 font-bold uppercase tracking-widest text-sm hover:bg-gray-100 transition-colors"
+                    >
+                      Buy Now
+                    </button>
+                  )}
+                </div>
               ) : (
                 <div className="w-full bg-gray-200 text-gray-500 py-4 font-bold uppercase tracking-widest text-sm text-center cursor-pointer hover:bg-gray-300 transition" onClick={() => navigate('/login')}>
-                  {item.username === (JSON.parse(localStorage.getItem('user'))?.username) ? "Your Item" : "Login to Swap"}
+                  {item.username === (JSON.parse(localStorage.getItem('user'))?.username)
+                    ? "Your Item"
+                    : (item.price != null && item.price !== '' ? "Login to Continue" : "Login to Swap")}
                 </div>
               )}
 

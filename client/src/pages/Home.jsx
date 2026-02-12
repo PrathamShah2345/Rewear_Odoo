@@ -10,6 +10,7 @@ const DEMO_PRODUCTS = [
     category: "Women",
     image_url: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1936&auto=format&fit=crop",
     condition: "Like New",
+    price: 85,
     points: 120
   },
   {
@@ -18,6 +19,7 @@ const DEMO_PRODUCTS = [
     category: "Accessories",
     image_url: "https://images.unsplash.com/photo-1590874102987-fdaef7d57a85?q=80&w=2080&auto=format&fit=crop",
     condition: "Gently Used",
+    price: 120,
     points: 85
   },
   {
@@ -26,6 +28,7 @@ const DEMO_PRODUCTS = [
     category: "Men",
     image_url: "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=1974&auto=format&fit=crop",
     condition: "New",
+    price: 95,
     points: 200
   },
   {
@@ -34,6 +37,7 @@ const DEMO_PRODUCTS = [
     category: "Home", // Example of extending categories
     image_url: "https://images.unsplash.com/photo-1612196808214-b7e239e5f6b7?q=80&w=1974&auto=format&fit=crop",
     condition: "New",
+    price: 60,
     points: 150
   }
 ];

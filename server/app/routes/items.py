@@ -21,6 +21,7 @@ def upload_item():
         description = data.get('description'),
         image_url = data.get('image_url'),
         additional_images = data.get('additional_images'), # JSON string
+        price = data.get('price'),
         size = data.get('size'),
         condition = data.get('condition'),
         type = data.get('type'),
@@ -56,6 +57,7 @@ def get_all_items():
             "description": item.description,
             "image_url": item.image_url,
             "additional_images": item.additional_images,
+            "price": item.price,
             "size": item.size,
             "condition": item.condition,
             "type": item.type,
@@ -80,6 +82,7 @@ def get_item_by_id(item_id):
         "description": item.description,
         "image_url": item.image_url,
         "additional_images": item.additional_images,
+        "price": item.price,
         "size": item.size,
         "condition": item.condition,
         "type": item.type,

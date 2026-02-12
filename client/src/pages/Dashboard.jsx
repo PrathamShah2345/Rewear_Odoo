@@ -4,6 +4,7 @@ import ProductCard from "../components/ProductCard";
 import { getItemsByUsername, getMySwaps, respondToSwap, getCurrentUser } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { FiSettings, FiLogOut } from "react-icons/fi";
+import Squares from '../components/Squares';
 
 const Dashboard = () => {
   const token = localStorage.getItem("token");
@@ -76,10 +77,11 @@ const Dashboard = () => {
   if (!currentUser) return null;
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="relative min-h-screen text-black overflow-hidden pt-24">
+      <Squares className="opacity-30" direction="diagonal" speed={0.5} borderColor="#4b5563" hoverFillColor="#111827" squareSize={56} />
 
       {/* Header Profile Section */}
-      <div className="bg-[#F5F5F5] py-16 px-6 border-b border-black">
+      <div className="relative z-10 bg-[#F5F5F5]/90 backdrop-blur-sm py-16 px-6 border-b border-black">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="flex items-center gap-6">
 
@@ -137,7 +139,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12 space-y-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 space-y-16">
 
         {/* Swaps Section - Split Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -148,7 +150,7 @@ const Dashboard = () => {
             {swapRequests.length > 0 ? (
               <div className="space-y-6">
                 {swapRequests.map((req) => (
-                  <div key={req.id} className="border border-gray-200 p-6 flex flex-col gap-4">
+                  <div key={req.id} className="border border-gray-200 p-6 flex flex-col gap-4 bg-white/80 backdrop-blur-sm">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="text-xs uppercase text-gray-500 tracking-wide">Request From</p>
@@ -188,7 +190,7 @@ const Dashboard = () => {
             {sentRequests.length > 0 ? (
               <div className="space-y-6">
                 {sentRequests.map((req) => (
-                  <div key={req.id} className="border border-gray-200 p-6">
+                  <div key={req.id} className="border border-gray-200 p-6 bg-white/80 backdrop-blur-sm">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="text-xs uppercase text-gray-500 tracking-wide">To</p>
